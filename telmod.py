@@ -4,6 +4,7 @@ import telnetlib
 import datetime
 import sys
 import re
+import utils_module as utilm
 import time
 
 class RemoteAccess:
@@ -53,7 +54,8 @@ class RemoteAccess:
 
 	def send_com_wf(self, cmd, fn):
 		"""
-		send_comの拡張。file objectを送って、コマンドの出力結果をファイルに保存
+		send_com＋ファイル保存機能。基本こちらを使うこと
+		cmd１行を送り込んで出力結果をファイルに保存
 		"""
 		res = self.send_com(cmd)
 		fn.write(res)
@@ -61,7 +63,7 @@ class RemoteAccess:
 
 	def send_com_list_wf(self, cmd_list, fn):
 		"""
-		send_com_wfの拡張。cmd_listにコマンドをリストで送り、逐次流し込む
+		★send_com_wfの拡張。cmd_listにコマンドをリストで送り、逐次流し込む
 		注意：promptは固定になってしまっているので、untilのpromptが変化する際には使用不可
 		"""
 		for cmd in cmd_list:

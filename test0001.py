@@ -2,6 +2,7 @@ import datetime
 import telmod
 import utils_module as utilm
 import time
+import collections
 
 def execute_test0001(r_list):
     print("executing test0001...")
@@ -18,6 +19,7 @@ def execute_test0001(r_list):
             raw_fn[r_name] = utilm.create_log_file(r_name,test_id)
             telctl[r_name] = telmod.RemoteAccess(**r_data)
             telctl[r_name].init_telnet()
+
 
         #試験内容記述
         initc_r = ["term len 0",
@@ -48,14 +50,20 @@ def execute_test0001(r_list):
                     "sh ip route"
                     ]
 
-        telctl["r1"].send_com_list_wf(initc_r , raw_fn["r1"])
-        telctl["r2"].send_com_list_wf(initc_r , raw_fn["r2"])
+        cmd_list1 = {"r1":initc_r, "r2":initc_r}
+        cmd_list2 = {"r1":r1_conf, "r2":r2_conf}
+        cmd_list3 = {"r1":afc_r, "r2":afc_r}
 
-        telctl["r1"].send_com_wf(" ",raw_fn["r1"])
-        telctl["r2"].send_com_wf(" ",raw_fn["r2"])
+        utilm.send_com_para(cmd_list1 , telctl , raw_fn)
+        #↓4行は↑にまとめられた
+        #telctl["r1"].send_com_list_wf(initc_r , raw_fn["r1"])
+        #telctl["r2"].send_com_list_wf(initc_r , raw_fn["r2"])
+        #telctl["r1"].send_com_wf(" ",raw_fn["r1"])
+        #telctl["r2"].send_com_wf(" ",raw_fn["r2"])
 
-        telctl["r1"].send_com_list_wf(r1_conf , raw_fn["r1"])
-        telctl["r2"].send_com_list_wf(r2_conf , raw_fn["r2"])
+        utilm.send_com_para(cmd_list2 , telctl , raw_fn)
+        #telctl["r1"].send_com_list_wf(r1_conf , raw_fn["r1"])
+        #telctl["r2"].send_com_list_wf(r2_conf , raw_fn["r2"])
 
         telctl["r1"].send_com_wf("!wait until bgp comes up..." , raw_fn["r1"])
         telctl["r2"].send_com_wf("!wait until bgp comes up..." , raw_fn["r2"])

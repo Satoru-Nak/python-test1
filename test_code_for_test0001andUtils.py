@@ -22,8 +22,8 @@ r2 = {"address":"192.168.44.20",
 
 r_list = {"r1":r1,"r2":r2}
 
-test0001.rollback_state_test0001(r_list)
-time.sleep(5)
+#test0001.rollback_state_test0001(r_list)
+#time.sleep(5)
 
 test0001.execute_test0001(r_list)
 time.sleep(5)

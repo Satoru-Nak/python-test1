@@ -1,6 +1,7 @@
 import os
 import datetime
 import re
+import telmod
 
 log_file_base_path = r"C:\Users\NTTCOM\SoftwareEng\python-test1"
 
@@ -23,3 +24,18 @@ def create_log_file(router_name , test_id):
         print("created files for " + test_id)
 
     return open(fullfilepath + "\\" + logfilename, "w")
+
+
+def send_com_para(cmd_list, telctl, raw_fn):
+    """
+    cmd_listはkey=router名（r_listのkey),value=流し込むコマンドのリスト
+    送られる順番はkeyのアルファベット順
+    """
+    for rs, c_list in sorted(cmd_list.items()):
+        #rsがtelctl, raw_fnに含まれることを確認して
+        if rs in telctl and rs in raw_fn:
+            #流し込み
+            telctl[rs].send_com_list_wf(c_list, raw_fn[rs])
+            telctl[rs].send_com_wf(" ",raw_fn[rs])
+        else:
+            print("router not defined in cmd_list key...")
