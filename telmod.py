@@ -36,12 +36,10 @@ class RemoteAccess:
 		self.prompt2 = "#"
 
 		self.tn = telnetlib.Telnet(self.address , 23 , 5)
-
 		self.read_untilb("Username:")
 		self.write_b(self.login_id)
 		self.read_untilb("Password:")
 		self.write_b(self.login_pass)
-
 		self.read_untilb(self.prompt1)
 		self.write_b("enable")
 		self.read_untilb("Password:")
