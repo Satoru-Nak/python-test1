@@ -45,8 +45,9 @@ class RemoteAccess:
 		self.write_b("enable")
 		self.read_untilb("Password:")
 		self.write_b(self.second_pass)
-
 		res = self.read_untilb(self.prompt2)
+
+		print("DEBUG:telnet_init successfully completed")
 		return(res)
 
 	def send_com(self, cmd):
@@ -56,6 +57,8 @@ class RemoteAccess:
 		"""
 		self.write_b(cmd)
 		res = self.read_untilb(self.prompt2)#この時点でresはbyte string
+
+		print("DEBUG:send_com successfully completed")
 
 		if isinstance(res, bytes):
 			return(res.decode("utf-8"))
@@ -82,4 +85,6 @@ class RemoteAccess:
 	def disconnect(self):
 		self.write_b("exit\n")
 		res = self.tn.read_all()
+
+		print("DEBUG:disconnect successfully completed")
 		return(res)
