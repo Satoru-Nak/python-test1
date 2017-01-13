@@ -9,6 +9,7 @@ class RemoteAccess:
 	"""
 	class used for accessing network equipments
 	valid type : cisco-ios, cisco-iosxe, cisco-iosxr, juniper
+	adding comments
 	"""
 
 	def __init__(self, address, r_type, login_id, login_pass, second_pass):
