@@ -4,6 +4,7 @@ import telnetlib
 import datetime
 import sys
 import re
+import time
 
 class RemoteAccess:
 	"""
@@ -47,8 +48,25 @@ class RemoteAccess:
 		self.write_b(self.second_pass)
 		res = self.read_untilb(self.prompt2)
 
-		print("DEBUG:telnet_init successfully completed")
+		print("DEBUG:telnet_init to " + self.address + " succeeded")
 		return(res)
+
+	def send_com_wf(self, cmd, fn):
+		"""
+		send_comの拡張。file objectを送って、コマンドの出力結果をファイルに保存
+		"""
+		res = self.send_com(cmd)
+		fn.write(res)
+		time.sleep(0.1)
+
+	def send_com_list_wf(self, cmd_list, fn):
+		"""
+		send_com_wfの拡張。cmd_listにコマンドをリストで送り、逐次流し込む
+		注意：promptは固定になってしまっているので、untilのpromptが変化する際には使用不可
+		"""
+		for cmd in cmd_list:
+			self.send_com_wf(" ",fn) #コマンドの間に空行（send_comで改行される）
+			self.send_com_wf(cmd,fn)
 
 	def send_com(self, cmd):
 		"""
@@ -58,7 +76,7 @@ class RemoteAccess:
 		self.write_b(cmd)
 		res = self.read_untilb(self.prompt2)#この時点でresはbyte string
 
-		print("DEBUG:send_com successfully completed")
+		#print("DEBUG:send_com successfully completed")
 
 		if isinstance(res, bytes):
 			return(res.decode("utf-8"))
@@ -67,6 +85,15 @@ class RemoteAccess:
 
 		#telnetlib使う場合、Telnet.read_untilは文字列を待ち受ける"
 		#Telnet.expectは正規表現のリストをとれる（どれかにあたればOK）
+
+	def wait_state(self, my_str, fn, timeout):
+		"""
+		特定の文字列表現が来るまで待つ
+		"""
+		res = self.tn.read_until(my_str.encode('ascii'),timeout)
+		#print(my_str + res.decode("utf-8"))
+		fn.write(res.decode("utf-8"))
+		#return(res.decode("utf-8"))
 
 	def clean_format(self, my_str):
 		"""
@@ -86,5 +113,5 @@ class RemoteAccess:
 		self.write_b("exit\n")
 		res = self.tn.read_all()
 
-		print("DEBUG:disconnect successfully completed")
+		print("DEBUG:disconnect from " + self.address + " succeeded")
 		return(res)

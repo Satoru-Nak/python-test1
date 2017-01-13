@@ -23,6 +23,7 @@ r_list = {"r1":r1,"r2":r2}
 raw_fn = {}
 telctl = {}
 
+"""
 for r_name,r_data in r_list.items():
     raw_fn[r_name] = create_log_file(r_name)
     telctl[r_name] = telmod.RemoteAccess(**r_data)
@@ -38,3 +39,4 @@ for fn in raw_fn.values():
 
 for telcl in telctl.values():
     telcl.disconnect()
+"""
