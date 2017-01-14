@@ -28,10 +28,12 @@ class RemoteAccess:
 
 	def read_untilb(self, my_str):
 		res = self.tn.read_until(my_str.encode('ascii'),5)
+		#print(my_str + ":" + res.decode("utf-8"))
 		return(res)
 
 	def write_b(self, my_str):
-		res = self.tn.write(my_str.encode('ascii')+b"\n")
+		self.tn.write(my_str.encode('ascii')+b"\n")
+		#print(my_str)
 
 	def init_telnet(self):
 		#telnet and login with login/pass
@@ -52,14 +54,23 @@ class RemoteAccess:
 		print("DEBUG:telnet_init to " + self.address + " succeeded")
 		return(res)
 
-	def send_com_wf(self, cmd, fn):
+	def send_com(self, cmd, fn):
 		"""
-		send_com＋ファイル保存機能。基本こちらを使うこと
-		cmd１行を送り込んで出力結果をファイルに保存
+		cmdを送って次にpromptが返ってくるまでの文字列をstring型で戻す
+		戻り値がbyte文字列の場合、encodeしてstring型で返す
 		"""
-		res = self.send_com(cmd)
+		self.write_b(cmd)
+		res = self.read_untilb(self.prompt2)#この時点でresはbyte string
+
+		if isinstance(res, bytes):
+			res = res.decode("utf-8")
+
 		fn.write(res)
 		time.sleep(0.1)
+
+		return(res)
+		#telnetlib使う場合、Telnet.read_untilは文字列を待ち受ける"
+		#Telnet.expectは正規表現のリストをとれる（どれかにあたればOK）
 
 	def send_com_list_wf(self, cmd_list, fn):
 		"""
@@ -67,26 +78,8 @@ class RemoteAccess:
 		注意：promptは固定になってしまっているので、untilのpromptが変化する際には使用不可
 		"""
 		for cmd in cmd_list:
-			self.send_com_wf(" ",fn) #コマンドの間に空行（send_comで改行される）
-			self.send_com_wf(cmd,fn)
-
-	def send_com(self, cmd):
-		"""
-		cmdを送って結果を戻す
-		戻り値がbyte文字列の場合、encodeしてstring型で返す
-		"""
-		self.write_b(cmd)
-		res = self.read_untilb(self.prompt2)#この時点でresはbyte string
-
-		#print("DEBUG:send_com successfully completed")
-
-		if isinstance(res, bytes):
-			return(res.decode("utf-8"))
-		else:
-			return(res)
-
-		#telnetlib使う場合、Telnet.read_untilは文字列を待ち受ける"
-		#Telnet.expectは正規表現のリストをとれる（どれかにあたればOK）
+			self.send_com(" ",fn) #コマンドの間に空行（send_comで改行される）
+			self.send_com(cmd,fn)
 
 	def wait_state(self, my_str, fn, timeout):
 		"""
