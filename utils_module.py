@@ -2,6 +2,8 @@ import os
 import datetime
 import re
 import telmod
+import glob
+import openpyxl as px
 
 log_file_base_path = r"C:\Users\NTTCOM\SoftwareEng\python-test1"
 
@@ -78,3 +80,56 @@ def terminate_telnet_proc(telctl, raw_fn):
 
     for telcl in telctl.values():
         telcl.disconnect()
+
+def get_test_data():
+    """
+    test0001.xlsxから試験に必要なデータを読み込む
+    現状　C2:test_id, C3:test_router_list
+    A列に項番記述（6行目からint型にすること）B列に試験手順名
+    C列にコマンドのリスト　D列にコマンド投入対象ルータ
+    ★B列は項番記述行以外に何もいれないこと（Noneであること）
+    ★完了の場合、A列に"END"文字列を記述すること
+
+    返り値：test_id:string型、test_router_list:リスト型　test_proc:ネストされたリスト型
+    test_procは[項番１のdata(リスト型), 項番２のdata(リスト型)...]
+    項番xのdata(リスト型)は[投入router_list(リスト型), command 1(string型), command2...]
+    """
+    editbook = "test0001/test0001.xlsx"
+    editsheet = "test_procedure"
+
+    book = px.load_workbook(editbook) #book読み込み
+    ws = book.worksheets[book.get_sheet_names().index(editsheet)] # sheet読み込み
+
+    test_id = ws.cell(row=2,column=3).value#test-id読み込み
+    test_router_list = ws.cell(row=3,column=3).value.split(",")#test_router_list読み込み
+
+    i = 6
+    proc_id = 0
+    test_proc = []
+
+    while True:
+        #print("DEBUG: current i:{0}".format(i))
+        if type(ws.cell(row=i,column=1).value) == int:#項番列が数値だったら
+            proc_id += 1
+            proc_tmp = []
+            proc_tmp.append(ws.cell(row=i,column=4).value.split(","))#投入ルータリスト
+            proc_tmp.append(r"!:" + ws.cell(row=i,column=2).value)#試験手順のコメント取得
+            proc_tmp.append(ws.cell(row=i,column=3).value)#コメントの横のコマンド読み込み
+
+            i += 1
+            while ws.cell(row=i,column=2).value == None and ws.cell(row=i,column=1).value != "END":
+                proc_tmp.append(ws.cell(row=i,column=3).value)
+                i += 1
+
+            test_proc.append(proc_tmp)
+
+        elif ws.cell(row=i,column=1).value == "END":
+            print("test data fetched. end reached with i = {0}".format(i))
+            break
+        else:
+            print("invalid error in importing test data ...")
+            break
+
+    test_data = [test_id, test_router_list, test_proc]
+    #print(test_data)
+    return test_data

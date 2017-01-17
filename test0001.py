@@ -51,6 +51,7 @@ def execute_test0001(r_list):
     utilm.send_com_para(cmd_list1 , telctl , raw_fn)
     utilm.send_com_para(cmd_list2 , telctl , raw_fn)
 
+    #途中待ち的なものとか、手動入力系
     telctl["r1"].send_com("!wait until bgp comes up..." , raw_fn["r1"])
     telctl["r2"].send_com("!wait until bgp comes up..." , raw_fn["r2"])
     #print("DEBUG:start waiting for bgp to come up")

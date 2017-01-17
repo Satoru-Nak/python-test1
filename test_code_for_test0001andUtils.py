@@ -25,6 +25,22 @@ r_list = {"r1":r1,"r2":r2}
 #test0001.rollback_state_test0001(r_list)
 #time.sleep(5)
 
+"""
 test0001.execute_test0001(r_list)
 time.sleep(5)
 test0001.rollback_state_test0001(r_list)
+"""
+
+#test code for get_test_data
+test_id = ""
+test_router_list = []
+test_proc = []
+test_id, test_router_list, test_proc = utilm.get_test_data()
+print("""---------------------------\n
+test information....\n
+----------------------------""")
+print("test_id:" + test_id)
+print("test_router_list:")
+print(test_router_list)
+print("test_proc:")
+print(test_proc)
