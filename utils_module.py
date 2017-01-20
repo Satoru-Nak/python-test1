@@ -71,6 +71,16 @@ def send_com_para(cmd_list, telctl, raw_fn):
         else:
             print("router not defined in cmd_list key...")
 
+def wait_com(wait_data, telctl, raw_fn):
+    r_name = "r1"
+    comment = wait_data[2]
+    wait_statement = wait_data[3]
+    timeout = float(wait_data[0][1])
+    print("r_name:{0}, comment:{1}, wait_statement:{2}, timeout:{3}".format(r_name, comment, wait_statement, timeout ))
+
+    telctl[r_name].send_com(comment, raw_fn[r_name])
+    telctl[r_name].wait_state(wait_statement, raw_fn[r_name], timeout)
+
 def terminate_telnet_proc(telctl, raw_fn):
     """
     終了処理　file close + telnet切断
@@ -86,13 +96,14 @@ def get_test_data():
     test0001.xlsxから試験に必要なデータを読み込む
     現状　C2:test_id, C3:test_router_list
     A列に項番記述（6行目からint型にすること）B列に試験手順名
-    C列にコマンドのリスト　D列にコマンド投入対象ルータ
+    C列にコマンドのリスト　D列にコマンド投入対象ルータ E列コマンド種別（WAIT、CMD）
     ★B列は項番記述行以外に何もいれないこと（Noneであること）
     ★完了の場合、A列に"END"文字列を記述すること
 
-    返り値：test_id:string型、test_router_list:リスト型　test_proc:ネストされたリスト型
-    test_procは[項番１のdata(リスト型), 項番２のdata(リスト型)...]
-    項番xのdata(リスト型)は[投入router_list(リスト型), command 1(string型), command2...]
+    返り値：test_id:str型、test_router_list:リスト型　test_proc:ネストされたリスト型
+    test_procは　[項番１のdata(リスト型), 項番２のdata(リスト型)...]
+    項番xのdata(リスト型)は　[コマンド種別, 投入router_list(リスト型), cmd1(str型), cmd2(str型)...]
+    コマンド種別がWAITの場合、コマンド種別リスト型で["WAIT","<timeout値>"]
     """
     editbook = "test0001/test0001.xlsx"
     editsheet = "test_procedure"
@@ -112,16 +123,33 @@ def get_test_data():
         if type(ws.cell(row=i,column=1).value) == int:#項番列が数値だったら
             proc_id += 1
             proc_tmp = []
+            #print("proc_id confirmed: {0}".format(proc_id))
+            #E列で種別を取得
+            if "CMD" in ws.cell(row=i,column=5).value:#コマンド文字列に"CMD"文字列が設定
+                proc_tmp.append("CMD")
+            elif "WAIT" in ws.cell(row=i,column=5).value.split(","):#コマンド種別に"WAIT"文字列を含む
+                proc_tmp.append(ws.cell(row=i,column=5).value.split(","))
+            elif "SLEEP" in ws.cell(row=i,column=5).value.split(","):#コマンド種別に"WAIT"文字列を含む
+                proc_tmp.append(ws.cell(row=i,column=5).value.split(","))
+            else:
+                print("ERROR: utils_module, get_test_data invalid command type")
+
             proc_tmp.append(ws.cell(row=i,column=4).value.split(","))#投入ルータリスト
             proc_tmp.append(r"!:" + ws.cell(row=i,column=2).value)#試験手順のコメント取得
-            proc_tmp.append(ws.cell(row=i,column=3).value)#コメントの横のコマンド読み込み
 
-            i += 1
-            while ws.cell(row=i,column=2).value == None and ws.cell(row=i,column=1).value != "END":
-                proc_tmp.append(ws.cell(row=i,column=3).value)
-                i += 1
-
-            test_proc.append(proc_tmp)
+            #項番内でのコマンドを取得してtest_procにappend
+            while True:
+                if ws.cell(row=i,column=1).value == "END":
+                    test_proc.append(proc_tmp)
+                    break
+                else:
+                    #C列コマンドをproc_tmpに書き込み
+                    proc_tmp.append(ws.cell(row=i,column=3).value)
+                    i += 1
+                    #次の行がNoneじゃなかったらproc_tmpをtest_procに書き込んでbreak
+                    if ws.cell(row=i,column=2).value != None:
+                        test_proc.append(proc_tmp)
+                        break
 
         elif ws.cell(row=i,column=1).value == "END":
             print("test data fetched. end reached with i = {0}".format(i))

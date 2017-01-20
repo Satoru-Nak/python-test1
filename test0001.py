@@ -59,7 +59,6 @@ def execute_test0001(r_list):
     #print("DEBUG:bgp might came up")
 
     utilm.send_com_para(cmd_list3 , telctl , raw_fn)
-
     #終了処理
     utilm.terminate_telnet_proc(telctl, raw_fn)
 

@@ -1,4 +1,5 @@
 import test0001
+import test_module as testm
 import utils_module as utilm
 import time
 
@@ -22,25 +23,29 @@ r2 = {"address":"192.168.44.20",
 
 r_list = {"r1":r1,"r2":r2}
 
+testm.execute_test(r_list)
+#time.sleep(5)
+#test0001.rollback_state_test0001(r_list)
+
 #test0001.rollback_state_test0001(r_list)
 #time.sleep(5)
 
-"""
-test0001.execute_test0001(r_list)
-time.sleep(5)
-test0001.rollback_state_test0001(r_list)
-"""
+#test0001.execute_test0001(r_list)
+#time.sleep(5)
+#test0001.rollback_state_test0001(r_list)
 
+"""
 #test code for get_test_data
 test_id = ""
 test_router_list = []
 test_proc = []
 test_id, test_router_list, test_proc = utilm.get_test_data()
-print("""---------------------------\n
+print(""---------------------------\n
 test information....\n
-----------------------------""")
+----------------------------"")
 print("test_id:" + test_id)
 print("test_router_list:")
 print(test_router_list)
 print("test_proc:")
 print(test_proc)
+"""
